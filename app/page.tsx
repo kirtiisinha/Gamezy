@@ -13,6 +13,9 @@
 
  export default function Home() { 
   const [showJoin, setShowJoin] = useState(false);
+//    showJoin: stores the current value
+//    setShowJoin: changes that value
+//     false: starting value
   const [board, setBoard] = useState([
   "", "", "",
   "", "", "", 
@@ -20,8 +23,50 @@
 ]); // board stores the current value of all 9 Tic-Tac-Toe cells
     // Each "" means that the cell is currently empty
   const [currentPlayer, setCurrentPlayer] = useState("X");
+  
+  const winningCombinations = [
+  [0, 1, 2],
+  [3, 4, 5],
+  [6, 7, 8],
+  [0, 3, 6],
+  [1, 4, 7],
+  [2, 5, 8],
+  [0, 4, 8],
+  [2, 4, 6],
+]; 
+  const checkWinner = (board: string[]) => {
+  for (const combination of winningCombinations) {
+    const [a, b, c] = combination;
 
+    if (
+      board[a] !== "" &&
+      board[a] === board[b] &&
+      board[a] === board[c]
+    ) {
+      return board[a];
+    }
+  }
+
+  return null;
+};
+  const [gamewinner, setGameWinner] = useState<string | null>(null);
+  const [isDraw, setIsDraw] = useState(false);
+  const restartGame = () => {
+  setBoard([
+    "", "", "",
+    "", "", "",
+    "", "", ""
+  ]);
+
+  setCurrentPlayer("X");
+  setGameWinner(null);
+  setIsDraw(false);
+};
   const handleClick = (index: number) => {
+    //Don't allow the loser to input symbol *omgg lol
+    if (gamewinner) {
+      return;
+    }
     // Don't allow a player to overwrite an occupied cell
     if (board[index] !== "") {
       return;
@@ -30,10 +75,18 @@
   // Put the current player's symbol in the clicked cell
   newBoard[index] = currentPlayer;
   setBoard(newBoard);
+  
+  const winner = checkWinner(newBoard);
 
-//    showJoin: stores the current value
-//    setShowJoin: changes that value
-//     false: starting value
+if (winner) {
+  setGameWinner(winner);
+  return;
+}
+if (!newBoard.includes("")) {
+  setIsDraw(true);
+  return;
+}
+
   setCurrentPlayer(currentPlayer === "X" ? "O" : "X");
 }; 
   return (
@@ -71,7 +124,13 @@
 
       <h4 className="mt-9 text-2xl font-bold">Tic-Tac-Toe</h4>
 
-{/* grid → use CSS Grid. grid-cols-3 → create 3 columns. */}
+    {gamewinner && (
+     <p className="mt-4 text-xl font-bold">
+       {gamewinner} wins! 🏆
+     </p>
+    )}
+
+{/* grid: use CSS Grid. grid-cols-3: create 3 columns. */}
 
 <div className="mt-4 grid grid-cols-3 gap-2">
 
@@ -100,16 +159,33 @@ Here, it creates one button for every board cell.
  */}
 
 </div>
+{/* Next mission: WIN DETECTION
+We'll learn:
+Arrays
+if conditions
+Win combinations
+Draw detection
+Preventing moves after the game end */}
+{isDraw && (
+  <p 
+   className={`mt-4 text-xl font-bold transition-all duration-900 ${
+    isDraw
+      ? "opacity-100 translate-y-0"
+      : "opacity-0 -translate-y-2"
+  }`}
+  >
+    It's a draw! 🤝
+  </p>
+)}
+{(gamewinner || isDraw) && (
+  <button 
+    onClick={restartGame}
+    // onClick={() => alert("New Game Started!")}
+    className= "text-lg mt-3 text-white border border-white rounded-md px-2">Restart ↺
+  </button>
+)}
+
 
     </main>
   );
 }
-
-// Next mission: WIN DETECTION
-// We'll learn:
-
-// Arrays
-// if conditions
-// Win combinations
-// Draw detection
-// Preventing moves after the game ends
