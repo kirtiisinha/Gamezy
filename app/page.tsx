@@ -10,6 +10,11 @@
  "use client"; //It tells Next.js:"This file contains code that needs to run in the browser."
   
  import { useState } from "react";
+ import { Manrope } from "next/font/google";
+
+ const manrope = Manrope({
+  subsets: ["latin"],
+});
 
  export default function Home() { 
   const [showJoin, setShowJoin] = useState(false);
@@ -43,7 +48,10 @@
       board[a] === board[b] &&
       board[a] === board[c]
     ) {
-      return board[a];
+      return {
+        winner: board[a],
+        combination: combination,
+      }
     }
   }
 
@@ -51,6 +59,7 @@
 };
   const [gamewinner, setGameWinner] = useState<string | null>(null);
   const [isDraw, setIsDraw] = useState(false);
+  const [winningCells, setWinningCells] = useState<number[]>([]);
   const restartGame = () => {
   setBoard([
     "", "", "",
@@ -76,12 +85,14 @@
   newBoard[index] = currentPlayer;
   setBoard(newBoard);
   
-  const winner = checkWinner(newBoard);
+  const result = checkWinner(newBoard);
 
-if (winner) {
-  setGameWinner(winner);
+if (result) {
+  setGameWinner(result.winner);
+  setWinningCells(result.combination);
   return;
 }
+
 if (!newBoard.includes("")) {
   setIsDraw(true);
   return;
@@ -90,10 +101,10 @@ if (!newBoard.includes("")) {
   setCurrentPlayer(currentPlayer === "X" ? "O" : "X");
 }; 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center">
-      <h1 className="text-5xl font-bold">Gamezy</h1>
+    <main className="min-h-screen flex flex-col items-center justify-center bg-[#620607]">
+      <h1 className={`${manrope.className} text-6xl font-extrabold tracking-tight leading-none`}>Gamezy</h1>
 
-      <p className="mt-4 text-lg">
+      <p className="mt-4 text-lg text-[#E19184]">
         Play. Challenge. Repeat.
       </p>
 
@@ -102,13 +113,13 @@ if (!newBoard.includes("")) {
       <div className="mt-8 flex gap-4"> 
         <button 
           onClick={() => alert("You clicked Create Game!+")}
-          className="px-6 py-3 rounded-lg bg-black text-white">
+          className="px-6 py-3 rounded-lg bg-[#E19184] text-[#620607] font-semibold shadow-md">
           Create Game
         </button>
  
         <button 
           onClick={() => setShowJoin(true)}
-          className="px-6 py-3 rounded-lg border border-black">
+          className="px-6 py-3 rounded-lg bg-transparent border border-[#E19184] text-[#E19184] font-semibold">
           Join Game
         </button>
 
@@ -122,17 +133,17 @@ if (!newBoard.includes("")) {
 
       </div>
 
-      <h4 className="mt-9 text-2xl font-bold">Tic-Tac-Toe</h4>
+      <h2 className="mt-9 text-3xl font-bold text-[#E19184]">Tic-Tac-Toe</h2>
 
     {gamewinner && (
-     <p className="mt-4 text-xl font-bold">
+     <p className="mt-4 text-xl font-bold  text-[#E19184]">
        {gamewinner} wins! 🏆
      </p>
     )}
 
 {/* grid: use CSS Grid. grid-cols-3: create 3 columns. */}
 
-<div className="mt-4 grid grid-cols-3 gap-2">
+<div className="mt-6 grid grid-cols-3 gap-3">
 
   {/* <button 
     onClick={() => {
@@ -147,7 +158,11 @@ if (!newBoard.includes("")) {
   <button
     key={index}
     onClick={() => handleClick(index)}
-    className="w-20 h-20 border"
+    className={`w-20 h-20 rounded-xl border border-[#E19184] text-3xl font-bold transition-all duration-200 ${
+     winningCells.includes(index)
+       ? "bg-[#E19184] text-[#620607]"
+       : "bg-[#7A0B0C] text-[#E19184]"
+    }`}
   >
     {cell}
   </button>
