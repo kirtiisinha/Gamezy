@@ -21,6 +21,8 @@
 //    showJoin: stores the current value
 //    setShowJoin: changes that value
 //     false: starting value
+  const [gameCode, setGameCode] = useState("");
+  const [joinCode, setJoinCode] = useState("");
   const [board, setBoard] = useState([
   "", "", "",
   "", "", "", 
@@ -70,6 +72,7 @@
   setCurrentPlayer("X");
   setGameWinner(null);
   setIsDraw(false);
+  setWinningCells([]);
 };
   const handleClick = (index: number) => {
     //Don't allow the loser to input symbol *omgg lol
@@ -109,31 +112,58 @@ if (!newBoard.includes("")) {
       </p>
 
 {/* mt-8: margin-topflex: put children in a flex layout gap-4: put space between the buttons. px: padding horizontally. */}
+<div className="mt-8 flex gap-4"> 
+  <button 
+    onClick={() => {
+      const code = Math.random().toString(36).substring(2, 8).toUpperCase();
+      setGameCode(code);
+    }}
+    className="px-6 py-3 rounded-lg bg-[#E19184] text-[#620607] font-semibold shadow-md"
+  >
+    Create Game
+  </button>
 
-      <div className="mt-8 flex gap-4"> 
-        <button 
-          onClick={() => alert("You clicked Create Game!+")}
-          className="px-6 py-3 rounded-lg bg-[#E19184] text-[#620607] font-semibold shadow-md">
-          Create Game
-        </button>
- 
-        <button 
-          onClick={() => setShowJoin(true)}
-          className="px-6 py-3 rounded-lg bg-transparent border border-[#E19184] text-[#E19184] font-semibold">
-          Join Game
-        </button>
-
+  <button 
+    onClick={() => setShowJoin(true)}
+    className="px-6 py-3 rounded-lg bg-transparent border border-[#E19184] text-[#E19184] font-semibold"
+  >
+    Join Game
+  </button>
+</div>
         {/* This little && is important, basically means: If showJoin is true, show this */}
       
         {showJoin && (
-           <p className="mt-6">
-             Enter your game code:
-          </p>
-        )}
+         <div className="mt-6 flex flex-col items-center gap-3">
+          <p>Enter your game code:</p>
 
-      </div>
-
-      <h2 className="mt-9 text-3xl font-bold text-[#E19184]">Tic-Tac-Toe</h2>
+          <input
+           type="text"
+           value={joinCode}
+           onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
+           placeholder="ABC123" 
+           maxLength={6}
+          className="px-4 py-2 rounded-lg text-black text-center tracking-widest"
+        />
+{/* means every time you type, React updates the state.
+You type:   a7k2p9
+                ↓
+joinCode:   A7K2P9 */}
+    <button
+      onClick={() => {
+       if (joinCode === gameCode) {
+       alert("Game joined successfully! 🎮");
+      } else {
+       alert("Invalid game code ❌");
+      }
+    }}
+      className="px-5 py-2 rounded-lg bg-[#E19184] text-[#620607] font-semibold"
+    >
+      Join
+    </button>
+  </div>
+)}
+      <h2 className="mt-9 text-3xl font-bold text-[#E19184]">
+        Tic-Tac-Toe</h2>
 
     {gamewinner && (
      <p className="mt-4 text-xl font-bold  text-[#E19184]">
@@ -181,8 +211,11 @@ if conditions
 Win combinations
 Draw detection
 Preventing moves after the game end */}
+
+
+
 {isDraw && (
-  <p 
+  <p
    className={`mt-4 text-xl font-bold transition-all duration-900 ${
     isDraw
       ? "opacity-100 translate-y-0"
@@ -200,6 +233,63 @@ Preventing moves after the game end */}
   </button>
 )}
 
+
+{gameCode && (
+  <div className="mt-6 text-center">
+    <p className="text-[#E19184]">Your Game Code</p>
+    <p className="mt-2 text-3xl font-bold tracking-widest">
+      {gameCode}
+    </p>
+    <p className="mt-2 text-sm text-[#E19184]">
+     Share this code with your friend 👥
+    </p>
+  </div>
+)}
+
+  {showJoin && (
+  <div className="fixed inset-0 flex items-center justify-center bg-black/50">
+    <div className="w-80 rounded-2xl bg-[#620607] border border-[#E19184] p-6 shadow-xl text-center">
+      
+      <h3 className="text-2xl font-bold text-[#E19184]">
+        Join Game
+      </h3>
+
+      <p className="mt-3">
+        Enter your game code:
+      </p>
+
+      <input
+        type="text"
+        value={joinCode}
+        onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
+        placeholder="ABC123"
+        maxLength={6}
+        className="mt-4 w-full rounded-lg px-4 py-2 text-black text-center tracking-widest"
+      />
+
+      <button
+        onClick={() => {
+          if (joinCode === gameCode) {
+            alert("Game joined successfully! 🎮");
+          } else {
+            alert("Invalid game code ❌");
+          }
+        }}
+        className="mt-4 px-5 py-2 rounded-lg bg-[#E19184] text-[#620607] font-semibold"
+      >
+        Join
+      </button>
+
+      <button
+        onClick={() => setShowJoin(false)}
+        className="block mx-auto mt-3 text-sm text-[#E19184]"
+      >
+        Cancel
+      </button>
+
+    </div>
+  </div>
+)} 
 
     </main>
   );
