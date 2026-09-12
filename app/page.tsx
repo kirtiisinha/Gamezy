@@ -9,20 +9,22 @@
 
  "use client"; //It tells Next.js:"This file contains code that needs to run in the browser."
   
- import { useState } from "react";
+ import { useEffect ,useState } from "react";
+ import { supabase } from "./lib/supabase";
  import { Manrope } from "next/font/google";
 
  const manrope = Manrope({
   subsets: ["latin"],
 });
 
- export default function Home() { 
+ export default function Home() {
   const [showJoin, setShowJoin] = useState(false);
 //    showJoin: stores the current value
 //    setShowJoin: changes that value
 //     false: starting value
   const [gameCode, setGameCode] = useState("");
   const [joinCode, setJoinCode] = useState("");
+  const [playerId] = useState(() => crypto.randomUUID());
   const [board, setBoard] = useState([
   "", "", "",
   "", "", "", 
@@ -74,9 +76,9 @@
   setIsDraw(false);
   setWinningCells([]);
 };
-  const handleClick = (index: number) => {
+  const handleClick = async (index: number) => {
     //Don't allow the loser to input symbol *omgg lol
-    if (gamewinner) {
+    if (gamewinner || isDraw) {
       return;
     }
     // Don't allow a player to overwrite an occupied cell
@@ -86,23 +88,83 @@
   const newBoard = [...board];
   // Put the current player's symbol in the clicked cell
   newBoard[index] = currentPlayer;
-  setBoard(newBoard);
   
   const result = checkWinner(newBoard);
+  let newWinner = null;
+  let newStatus = "ACTIVE";
 
-if (result) {
+  if (result) {
+  newWinner = result.winner;
+  newStatus = result.winner === "X" ? "X_WON" : "O_WON";
   setGameWinner(result.winner);
   setWinningCells(result.combination);
-  return;
-}
-
-if (!newBoard.includes("")) {
+} else if (!newBoard.includes("")) {
+  newStatus = "DRAW";
   setIsDraw(true);
-  return;
 }
 
-  setCurrentPlayer(currentPlayer === "X" ? "O" : "X");
-}; 
+const nextPlayer = currentPlayer === "X" ? "O" : "X";
+setBoard(newBoard);
+
+if (!result && newBoard.includes("")) {
+    setCurrentPlayer(nextPlayer);
+  }
+  const { error } = await supabase
+  .from("games")
+  .update({
+    board: newBoard,
+    current_player: nextPlayer,
+    status: newStatus,
+    winner: newWinner,
+    })
+    .eq("code", gameCode);
+
+  if (error) {
+    console.error("Move update failed:", error);
+  }
+};
+ 
+ useEffect(() => {
+  console.log("Starting Realtime for game:", gameCode);
+
+  if (!gameCode) {
+    return;
+  }
+
+  const channel = supabase
+    .channel(`game-${gameCode}`)
+    .on(
+      "postgres_changes",
+      {
+        event: "UPDATE",
+        schema: "public",
+        table: "games",
+        filter: `code=eq.${gameCode}`,
+      },
+     (payload) => {
+  console.log("Game updated:", payload.new);
+
+  setBoard(payload.new.board);
+  setCurrentPlayer(payload.new.current_player);
+
+  if (payload.new.winner) {
+    setGameWinner(payload.new.winner);
+  }
+
+  if (payload.new.status === "DRAW") {
+    setIsDraw(true);
+  }
+}
+    )
+    .subscribe((status) => {
+      console.log("Realtime status:", status);
+    });
+
+  return () => {
+    supabase.removeChannel(channel);
+  };
+}, [gameCode]);
+
   return (
     <main className="min-h-screen flex flex-col items-center justify-center bg-[#620607]">
       <h1 className={`${manrope.className} text-6xl font-extrabold tracking-tight leading-none`}>Gamezy</h1>
@@ -114,10 +176,31 @@ if (!newBoard.includes("")) {
 {/* mt-8: margin-topflex: put children in a flex layout gap-4: put space between the buttons. px: padding horizontally. */}
 <div className="mt-8 flex gap-4"> 
   <button 
-    onClick={() => {
-      const code = Math.random().toString(36).substring(2, 8).toUpperCase();
-      setGameCode(code);
-    }}
+    onClick={async () => {
+  const code = Math.random().toString(36).substring(2, 8).toUpperCase();
+
+  const { error } = await supabase
+    .from("games")
+    .insert({
+  code: code,
+  player_x: playerId,
+})
+//   Click
+//  ↓
+// Generate code
+//  ↓
+// INSERT into Supabase 🗄️
+//  ↓
+// If successful → show code
+
+  if (error) {
+    console.error(error);
+    alert("Could not create game ❌");
+    return;
+  }
+
+  setGameCode(code);
+}}
     className="px-6 py-3 rounded-lg bg-[#E19184] text-[#620607] font-semibold shadow-md"
   >
     Create Game
@@ -131,37 +214,7 @@ if (!newBoard.includes("")) {
   </button>
 </div>
         {/* This little && is important, basically means: If showJoin is true, show this */}
-      
-        {showJoin && (
-         <div className="mt-6 flex flex-col items-center gap-3">
-          <p>Enter your game code:</p>
-
-          <input
-           type="text"
-           value={joinCode}
-           onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
-           placeholder="ABC123" 
-           maxLength={6}
-          className="px-4 py-2 rounded-lg text-black text-center tracking-widest"
-        />
-{/* means every time you type, React updates the state.
-You type:   a7k2p9
-                ↓
-joinCode:   A7K2P9 */}
-    <button
-      onClick={() => {
-       if (joinCode === gameCode) {
-       alert("Game joined successfully! 🎮");
-      } else {
-       alert("Invalid game code ❌");
-      }
-    }}
-      className="px-5 py-2 rounded-lg bg-[#E19184] text-[#620607] font-semibold"
-    >
-      Join
-    </button>
-  </div>
-)}
+    
       <h2 className="mt-9 text-3xl font-bold text-[#E19184]">
         Tic-Tac-Toe</h2>
 
@@ -247,8 +300,8 @@ Preventing moves after the game end */}
 )}
 
   {showJoin && (
-  <div className="fixed inset-0 flex items-center justify-center bg-black/50">
-    <div className="w-80 rounded-2xl bg-[#620607] border border-[#E19184] p-6 shadow-xl text-center">
+  <div className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+    <div className="w-80 rounded-2xl bg-[#620607] border border-[#E19184] p-6 shadow-xl text-center animate-[popup_0.2s_ease-out]">
       
       <h3 className="text-2xl font-bold text-[#E19184]">
         Join Game
@@ -268,13 +321,40 @@ Preventing moves after the game end */}
       />
 
       <button
-        onClick={() => {
-          if (joinCode === gameCode) {
-            alert("Game joined successfully! 🎮");
-          } else {
-            alert("Invalid game code ❌");
-          }
-        }}
+        onClick={async () => {
+  const { data, error } = await supabase
+    .from("games")
+    .select("id, code, player_o")
+    .eq("code", joinCode)
+    .single();
+
+  if (error || !data) {
+    alert("Invalid game code ❌");
+    return;
+  }
+
+  if (data.player_o) {
+    alert("This game already has two players ❌");
+    return;
+  }
+
+  const { error: updateError } = await supabase
+    .from("games")
+    .update({
+      player_o: playerId,
+      status: "ACTIVE",
+    })
+    .eq("id", data.id);
+
+  if (updateError) {
+    console.error(updateError);
+    alert("Could not join game ❌");
+    return;
+  }
+  alert("Game joined successfully! 🎮"); 
+  setGameCode(data.code);
+  setShowJoin(false);
+}}
         className="mt-4 px-5 py-2 rounded-lg bg-[#E19184] text-[#620607] font-semibold"
       >
         Join
