@@ -32,7 +32,8 @@
 ]); // board stores the current value of all 9 Tic-Tac-Toe cells
     // Each "" means that the cell is currently empty
   const [currentPlayer, setCurrentPlayer] = useState("X");
-  
+  const [playerRole, setPlayerRole] = useState<"X" | "O" | null>(null);
+
   const winningCombinations = [
   [0, 1, 2],
   [3, 4, 5],
@@ -77,6 +78,9 @@
   setWinningCells([]);
 };
   const handleClick = async (index: number) => {
+    if (!playerRole || playerRole !== currentPlayer) {
+  return;
+}
     //Don't allow the loser to input symbol *omgg lol
     if (gamewinner || isDraw) {
       return;
@@ -193,13 +197,15 @@ if (!result && newBoard.includes("")) {
 //  ↓
 // If successful → show code
 
-  if (error) {
-    console.error(error);
-    alert("Could not create game ❌");
-    return;
-  }
+ if (error) {
+  console.error(error);
+  alert("Could not create game ❌");
+  return;
+}
 
-  setGameCode(code);
+setPlayerRole("X");
+setGameCode(code);
+
 }}
     className="px-6 py-3 rounded-lg bg-[#E19184] text-[#620607] font-semibold shadow-md"
   >
@@ -217,6 +223,13 @@ if (!result && newBoard.includes("")) {
     
       <h2 className="mt-9 text-3xl font-bold text-[#E19184]">
         Tic-Tac-Toe</h2>
+     {playerRole && !gamewinner && !isDraw && (
+      <p className="mt-3 text-lg font-semibold text-[#E19184]">
+       {playerRole === currentPlayer
+        ? "Your turn 🎮"
+        : `Waiting for ${currentPlayer}...`}
+      </p>
+      )}
 
     {gamewinner && (
      <p className="mt-4 text-xl font-bold  text-[#E19184]">
@@ -241,7 +254,14 @@ if (!result && newBoard.includes("")) {
   <button
     key={index}
     onClick={() => handleClick(index)}
-    className={`w-20 h-20 rounded-xl border border-[#E19184] text-3xl font-bold transition-all duration-200 ${
+  disabled={
+    !playerRole ||
+    playerRole !== currentPlayer ||
+    gamewinner !== null ||
+    isDraw ||
+    cell !== ""
+  }
+    className={`w-20 h-20 rounded-xl border border-[#E19184] text-3xl font-bold transition-all duration-200 disabled:cursor-not-allowed ${
      winningCells.includes(index)
        ? "bg-[#E19184] text-[#620607]"
        : "bg-[#7A0B0C] text-[#E19184]"
@@ -347,13 +367,16 @@ Preventing moves after the game end */}
     .eq("id", data.id);
 
   if (updateError) {
-    console.error(updateError);
-    alert("Could not join game ❌");
-    return;
-  }
-  alert("Game joined successfully! 🎮"); 
-  setGameCode(data.code);
-  setShowJoin(false);
+  console.error(updateError);
+  alert("Could not join game ❌");
+  return;
+}
+
+setPlayerRole("O");
+setGameCode(data.code);
+setShowJoin(false);
+setJoinSuccess(true);
+
 }}
         className="mt-4 px-5 py-2 rounded-lg bg-[#E19184] text-[#620607] font-semibold"
       >
