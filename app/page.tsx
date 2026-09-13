@@ -127,13 +127,51 @@ if (!result && newBoard.includes("")) {
     console.error("Move update failed:", error);
   }
 };
+useEffect(() => {
+  const savedGameCode = localStorage.getItem("gameCode");
+  const savedPlayerRole = localStorage.getItem("playerRole");
+
+  if (savedGameCode) {
+    setGameCode(savedGameCode);
+  }
+
+  if (savedPlayerRole === "X" || savedPlayerRole === "O") {
+    setPlayerRole(savedPlayerRole);
+  }
+}, []);
  
- useEffect(() => {
+useEffect(() => {
   console.log("Starting Realtime for game:", gameCode);
 
   if (!gameCode) {
     return;
   }
+
+  const loadGame = async () => {
+    const { data, error } = await supabase
+      .from("games")
+      .select("board, current_player, status, winner")
+      .eq("code", gameCode)
+      .single();
+
+    if (error) {
+      console.error("Could not load game:", error);
+      return;
+    }
+
+    setBoard(data.board);
+    setCurrentPlayer(data.current_player);
+
+    if (data.winner) {
+      setGameWinner(data.winner);
+    }
+
+    if (data.status === "DRAW") {
+      setIsDraw(true);
+    }
+  };
+
+  loadGame();
 
   const channel = supabase
     .channel(`game-${gameCode}`)
@@ -145,20 +183,20 @@ if (!result && newBoard.includes("")) {
         table: "games",
         filter: `code=eq.${gameCode}`,
       },
-     (payload) => {
-  console.log("Game updated:", payload.new);
+      (payload) => {
+        console.log("Game updated:", payload.new);
 
-  setBoard(payload.new.board);
-  setCurrentPlayer(payload.new.current_player);
+        setBoard(payload.new.board);
+        setCurrentPlayer(payload.new.current_player);
 
-  if (payload.new.winner) {
-    setGameWinner(payload.new.winner);
-  }
+        if (payload.new.winner) {
+          setGameWinner(payload.new.winner);
+        }
 
-  if (payload.new.status === "DRAW") {
-    setIsDraw(true);
-  }
-}
+        if (payload.new.status === "DRAW") {
+          setIsDraw(true);
+        }
+      }
     )
     .subscribe((status) => {
       console.log("Realtime status:", status);
@@ -205,6 +243,8 @@ if (!result && newBoard.includes("")) {
 
 setPlayerRole("X");
 setGameCode(code);
+localStorage.setItem("gameCode", code);
+localStorage.setItem("playerRole", "X");
 
 }}
     className="px-6 py-3 rounded-lg bg-[#E19184] text-[#620607] font-semibold shadow-md"
@@ -355,6 +395,7 @@ Preventing moves after the game end */}
 
   if (data.player_o) {
     alert("This game already has two players ❌");
+    setShowJoin(false);
     return;
   }
 
@@ -374,8 +415,12 @@ Preventing moves after the game end */}
 
 setPlayerRole("O");
 setGameCode(data.code);
+
+localStorage.setItem("gameCode", data.code);
+localStorage.setItem("playerRole", "O");
+
 setShowJoin(false);
-setJoinSuccess(true);
+
 
 }}
         className="mt-4 px-5 py-2 rounded-lg bg-[#E19184] text-[#620607] font-semibold"
