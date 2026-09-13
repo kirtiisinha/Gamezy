@@ -24,6 +24,20 @@
 //     false: starting value
   const [gameCode, setGameCode] = useState("");
   const [joinCode, setJoinCode] = useState("");
+  const [gameMessage, setGameMessage] = useState("");
+  const [isClosingMessage, setIsClosingMessage] = useState(false);
+  const showGameMessage = (message: string) => {
+  setIsClosingMessage(false);
+  setGameMessage(message);
+
+  setTimeout(() => {
+    setIsClosingMessage(true);
+
+    setTimeout(() => {
+      setGameMessage("");
+    }, 300);
+  }, 2700);
+};
   const [playerId] = useState(() => crypto.randomUUID());
   const [board, setBoard] = useState([
   "", "", "",
@@ -65,34 +79,60 @@
   const [gamewinner, setGameWinner] = useState<string | null>(null);
   const [isDraw, setIsDraw] = useState(false);
   const [winningCells, setWinningCells] = useState<number[]>([]);
- 
- const restartGame = async () => {
-  const emptyBoard = [
+  const restartGame = () => {
+  setBoard([
     "", "", "",
     "", "", "",
     "", "", ""
-  ];
-
-  setBoard(emptyBoard);
+  ]);
   setCurrentPlayer("X");
   setGameWinner(null);
   setIsDraw(false);
   setWinningCells([]);
 
-  const { error } = await supabase
-    .from("games")
-    .update({
-      board: emptyBoard,
-      current_player: "X",
-      status: "ACTIVE",
-      winner: null,
-    })
-    .eq("code", gameCode);
-
-  if (error) {
-    console.error("Restart failed:", error);
-  }
 };
+const leaveGame = async () => {
+  if (gameCode && playerRole) {
+    const updateData =
+      playerRole === "X"
+        ? {
+            player_x: null,
+            player_x_left: true,
+          }
+        : {
+            player_o: null,
+            player_o_left: true,
+          };
+
+    const { error } = await supabase
+      .from("games")
+      .update(updateData)
+      .eq("code", gameCode);
+
+    if (error) {
+      console.error("Leave game failed:", error);
+      return;
+    }
+  }
+
+  setGameCode("");
+  setPlayerRole(null);
+
+  setBoard([
+    "", "", "",
+    "", "", "",
+    "", "", ""
+  ]);
+
+  setCurrentPlayer("X");
+  setGameWinner(null);
+  setIsDraw(false);
+  setWinningCells([]);
+
+  localStorage.removeItem("gameCode");
+  localStorage.removeItem("playerRole");
+};
+
   const handleClick = async (index: number) => {
     if (!playerRole || playerRole !== currentPlayer) {
   return;
@@ -166,7 +206,7 @@ useEffect(() => {
   const loadGame = async () => {
     const { data, error } = await supabase
       .from("games")
-      .select("board, current_player, status, winner")
+      .select("board, current_player, status, winner, player_o_left")
       .eq("code", gameCode)
       .single();
 
@@ -212,7 +252,26 @@ useEffect(() => {
         if (payload.new.status === "DRAW") {
           setIsDraw(true);
         }
-      }
+      
+      if (payload.new.player_o_left) {
+       setGameCode("");
+      setPlayerRole(null);
+      setGameWinner(null);
+      setIsDraw(false);
+      setWinningCells([]);
+
+      showGameMessage("Your opponent left the game 👋");
+  }
+     if (payload.new.player_x_left) {
+      setGameCode("");
+      setPlayerRole(null);
+      setGameWinner(null);
+      setIsDraw(false);
+      setWinningCells([]);
+
+     showGameMessage("Your opponent left the game 👋");
+   }
+}
     )
     .subscribe((status) => {
       console.log("Realtime status:", status);
@@ -279,12 +338,26 @@ localStorage.setItem("playerRole", "X");
     
       <h2 className="mt-9 text-3xl font-bold text-[#E19184]">
         Tic-Tac-Toe</h2>
+
+ {gameMessage && (
+  <div
+    className={`fixed top-5 right-5 z-50 rounded-xl border border-[#E19184] bg-[#7A0B0C] px-5 py-3 text-[#E19184] shadow-xl ${
+      isClosingMessage
+        ? "animate-[popupClose_0.3s_ease-in_forwards]"
+        : "animate-[popup_0.2s_ease-out]"
+    }`}
+  >
+    {gameMessage}
+  </div>
+)}
+
      {playerRole && !gamewinner && !isDraw && (
       <p className="mt-3 text-lg font-semibold text-[#E19184]">
        {playerRole === currentPlayer
         ? "Your turn 🎮"
         : `Waiting for ${currentPlayer}...`}
       </p>
+      
       )}
 
     {gamewinner && (
@@ -361,7 +434,14 @@ Preventing moves after the game end */}
     className= "text-lg mt-3 text-white border border-white rounded-md px-2">Restart ↺
   </button>
 )}
-
+{gameCode && (
+  <button
+    onClick={leaveGame}
+    className="mt-3 text-sm text-[#E19184] border border-[#E19184] rounded-md px-3 py-1"
+  >
+    Leave Game 🚪
+  </button>
+)}
 
 {gameCode && (
   <div className="mt-6 text-center">
