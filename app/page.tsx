@@ -65,17 +65,33 @@
   const [gamewinner, setGameWinner] = useState<string | null>(null);
   const [isDraw, setIsDraw] = useState(false);
   const [winningCells, setWinningCells] = useState<number[]>([]);
-  const restartGame = () => {
-  setBoard([
+ 
+ const restartGame = async () => {
+  const emptyBoard = [
     "", "", "",
     "", "", "",
     "", "", ""
-  ]);
+  ];
 
+  setBoard(emptyBoard);
   setCurrentPlayer("X");
   setGameWinner(null);
   setIsDraw(false);
   setWinningCells([]);
+
+  const { error } = await supabase
+    .from("games")
+    .update({
+      board: emptyBoard,
+      current_player: "X",
+      status: "ACTIVE",
+      winner: null,
+    })
+    .eq("code", gameCode);
+
+  if (error) {
+    console.error("Restart failed:", error);
+  }
 };
   const handleClick = async (index: number) => {
     if (!playerRole || playerRole !== currentPlayer) {
@@ -418,7 +434,6 @@ setGameCode(data.code);
 
 localStorage.setItem("gameCode", data.code);
 localStorage.setItem("playerRole", "O");
-
 setShowJoin(false);
 
 
