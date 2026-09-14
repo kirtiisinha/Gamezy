@@ -384,7 +384,7 @@ localStorage.setItem("playerRole", "X");
     isDraw ||
     cell !== ""
   }
-    className={`w-20 h-20 rounded-xl border border-[#E19184] text-3xl font-bold transition-all duration-200 hover:scale-105 hover:brightness-110 disabled:cursor-not-allowed ${
+  className={`w-20 h-20 rounded-xl border border-[#E19184] text-3xl font-bold transition-all duration-200 hover:scale-105 hover:brightness-110 active:scale-95 disabled:cursor-not-allowed ${
   winningCells.includes(index)
     ? "bg-[#E19184] text-[#620607]"
     : "bg-[#7A0B0C] text-[#E19184]"
