@@ -339,17 +339,11 @@ localStorage.setItem("playerRole", "X");
       <h2 className="mt-9 text-3xl font-bold text-[#E19184]">
         Tic-Tac-Toe</h2>
 
- {gameMessage && (
-  <div
-    className={`fixed top-5 right-5 z-50 rounded-xl border border-[#E19184] bg-[#7A0B0C] px-5 py-3 text-[#E19184] shadow-xl ${
-      isClosingMessage
-        ? "animate-[popupClose_0.3s_ease-in_forwards]"
-        : "animate-[popup_0.2s_ease-out]"
-    }`}
-  >
-    {gameMessage}
-  </div>
-)}
+   {gameMessage && (
+     <div className="fixed top-5 right-5 z-50 rounded-xl border border-[#E19184] bg-[#7A0B0C] px-5 py-3 text-[#E19184] shadow-xl animate-[popup_0.2s_ease-out]">
+       {gameMessage}
+     </div>
+   )}
 
      {playerRole && !gamewinner && !isDraw && (
       <p className="mt-3 text-lg font-semibold text-[#E19184]">
@@ -390,11 +384,11 @@ localStorage.setItem("playerRole", "X");
     isDraw ||
     cell !== ""
   }
-    className={`w-20 h-20 rounded-xl border border-[#E19184] text-3xl font-bold transition-all duration-200 disabled:cursor-not-allowed ${
-     winningCells.includes(index)
-       ? "bg-[#E19184] text-[#620607]"
-       : "bg-[#7A0B0C] text-[#E19184]"
-    }`}
+    className={`w-20 h-20 rounded-xl border border-[#E19184] text-3xl font-bold transition-all duration-200 hover:scale-105 hover:brightness-110 disabled:cursor-not-allowed ${
+  winningCells.includes(index)
+    ? "bg-[#E19184] text-[#620607]"
+    : "bg-[#7A0B0C] text-[#E19184]"
+}`}
   >
     {cell}
   </button>
