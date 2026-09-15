@@ -25,6 +25,38 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+/* Soft atmospheric movement for the Gamezy background */
+.game-bg {
+  position: absolute;
+  inset: -5%;
+  background: url("/gamezy-night.png") center / cover no-repeat;
+  filter: blur(4px);
+  transform: scale(1.05);
+  animation: backgroundDrift 20s ease-in-out infinite alternate;
+  z-index: 0;
+}
+
+.pixel-overlay {
+  position: absolute;
+  inset: 0;
+  background-image: url("/pixel-pattern.png");
+  background-repeat: repeat;
+  background-size: 160px 160px;
+  opacity: 0.20;
+  pointer-events: none;
+  z-index: 1;
+}
+
+@keyframes backgroundDrift {
+  from {
+    transform: scale(1.05) translate(0, 0);
+  }
+
+  to {
+    transform: scale(1.08) translate(-1%, 1%);
+  }
+}
+
 @keyframes popupClose {
   from {
     opacity: 1;
@@ -46,5 +78,77 @@ body {
   to {
     opacity: 1;
     transform: scale(1);
+  }
+}
+@keyframes fall {
+  from {
+    transform: translateY(0);
+    opacity: 0;
+  }
+
+  10% {
+    opacity: 1;
+  }
+
+  90% {
+    opacity: 1;
+  }
+
+  to {
+    transform: translateY(100vh);
+    opacity: 0;
+  }
+}
+.game-bg {
+  position: absolute;
+  inset: -5%;
+  background: url("/gamezy-night.png") center / cover no-repeat;
+  filter: blur(4px);
+  transform: scale(1.05);
+  animation: backgroundDrift 20s ease-in-out infinite alternate;
+  z-index: 0;
+}
+
+@keyframes backgroundDrift {
+  from {
+    transform: scale(1.05) translate(0, 0);
+  }
+
+  to {
+    transform: scale(1.08) translate(-1%, 1%);
+  }
+}
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.3;
+  }
+
+  50% {
+    transform: translateY(-12px);
+    opacity: 0.8;
+  }
+}
+.firefly {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 9999px;
+  background: rgba(180, 220, 255, 0.8);
+  box-shadow: 0 0 8px rgba(180, 220, 255, 0.7);
+  animation: fireflyGlow 4s ease-in-out infinite;
+}
+
+@keyframes fireflyGlow {
+  0%,
+  100% {
+    opacity: 0.15;
+    transform: translate(0, 0);
+  }
+
+  50% {
+    opacity: 0.9;
+    transform: translate(6px, -10px);
   }
 }
