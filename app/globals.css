@@ -4,7 +4,18 @@
   --background: #ffffff;
   --foreground: #171717;
 }
-
+@font-face {
+  font-family: "Magisse";
+  src: url("/fonts/Magisse.otf") format("opentype");
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: "Aretha Bridge";
+  src: url("/fonts/ArethaBridge.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -29,10 +40,9 @@ body {
 .game-bg {
   position: absolute;
   inset: -5%;
-  background: url("/gamezy-night.png") center / cover no-repeat;
-  filter: blur(4px);
+  background: url("/gamezy-pixel.png") center / cover no-repeat;
   transform: scale(1.05);
-  animation: backgroundDrift 20s ease-in-out infinite alternate;
+  animation: backgroundDrift 30s ease-in-out infinite alternate;
   z-index: 0;
 }
 
@@ -41,7 +51,7 @@ body {
   inset: 0;
   background-image: url("/pixel-pattern.png");
   background-repeat: repeat;
-  background-size: 160px 160px;
+  background-size: 100px 100px;
   opacity: 0.20;
   pointer-events: none;
   z-index: 1;
@@ -99,15 +109,6 @@ body {
     opacity: 0;
   }
 }
-.game-bg {
-  position: absolute;
-  inset: -5%;
-  background: url("/gamezy-night.png") center / cover no-repeat;
-  filter: blur(4px);
-  transform: scale(1.05);
-  animation: backgroundDrift 20s ease-in-out infinite alternate;
-  z-index: 0;
-}
 
 @keyframes backgroundDrift {
   from {
@@ -128,6 +129,16 @@ body {
   50% {
     transform: translateY(-12px);
     opacity: 0.8;
+  }
+  
+}
+@keyframes loading {
+  from {
+    width: 0%;
+  }
+
+  to {
+    width: 100%;
   }
 }
 .firefly {

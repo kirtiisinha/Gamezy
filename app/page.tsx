@@ -11,8 +11,17 @@
 
  import { useEffect ,useState } from "react";
  import { supabase } from "./lib/supabase";
- import { Pixelify_Sans, Press_Start_2P } from "next/font/google";
- 
+ import {
+  Pixelify_Sans,
+  Press_Start_2P,
+  MedievalSharp,
+} from "next/font/google";
+
+const medieval = MedievalSharp({
+  subsets: ["latin"],
+  weight: "400",
+});
+
 const pixelifySans = Pixelify_Sans({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
@@ -29,7 +38,15 @@ const pressStart = Press_Start_2P({
 //    setShowJoin: changes that value
 //     false: starting value
   const [gameCode, setGameCode] = useState("");
-  const [gameStage, setGameStage] = useState("start");
+  const [gameStage, setGameStage] = useState<
+  "home" | "select" | "game"
+  >("home");
+
+  const [selectedMenu, setSelectedMenu] = useState("CONTINUE");
+  const [showOptions, setShowOptions] = useState(false);
+  const [showCredits, setShowCredits] = useState(false);
+  const [showExit, setShowExit] = useState(false);
+
   const [joinCode, setJoinCode] = useState("");
   const [gameMessage, setGameMessage] = useState("");
   const [isClosingMessage, setIsClosingMessage] = useState(false);
@@ -329,59 +346,330 @@ useEffect(() => {
   <div className="firefly left-[74%] top-[76%]" />
   <div className="firefly left-[87%] top-[63%]" />
 </div>
+{gameStage === "home" && (
+  <div className="relative z-10 flex min-h-screen w-full items-center justify-center">
 
-  {gameStage === "start" && (
-  <div className="relative z-10 flex flex-col items-center justify-center text-center">
-   <h1
-  className={`${pressStart.className} text-5xl text-white [text-shadow:3px_3px_0_#3B82F6]`}
+    {/* Main Gamezy Menu */}
+    <div className="flex flex-col items-center text-center">
+
+      {/* GAMEZY LOGO */}
+      <h1
+  className="text-8xl tracking-wide text-[#E8F4FF] drop-shadow-[0_4px_12px_rgba(0,0,0,0.7)]"
+  style={{ fontFamily: '"Aretha Bridge", serif' }}
 >
-  Gamezy
+  GAMEZY
 </h1>
+      <p 
+      className="mt-3 text-md tracking-[0.35em] text-[#B9E6FF]/50 uppercase"
+      style={{ fontFamily: '"Magisse", serif' }} >
+        Play. Challenge. Repeat.
+      </p>
 
-    <p className="mt-3 text-[#B9E6FF] text-lg">
-      Play. Challenge. Repeat.
-    </p>
 
-    <button
-      onClick={() => {
-        setGameStage("loading");
+      {/* MAIN MENU */}
+      <div className="mt-10 flex flex-col items-center">
 
-        setTimeout(() => {
-          setGameStage("game");
-        }, 2000);
-      }}
-      className="mt-10 px-8 py-3 rounded-lg bg-[#8FD3FF] text-[#07111F] font-bold tracking-wide shadow-[0_0_20px_rgba(143,211,255,0.25)] transition-all duration-200 hover:brightness-110 hover:scale-105 active:scale-95"
-    >
-      START GAME
-    </button>
+        {/* CONTINUE */}
+        <button
+          onMouseEnter={() => setSelectedMenu("CONTINUE")}
+          onClick={() => setGameStage("game")}
+          className="group flex items-center justify-center gap-3 py-2 cursor-pointer"
+        >
+          <span
+            className={`w-5 text-[#B9E6FF] transition-all duration-200 ${
+              selectedMenu === "CONTINUE"
+                ? "translate-x-0 opacity-100"
+                : "-translate-x-2 opacity-0"
+            }`}
+          >
+            ✦
+          </span>
 
-    <p className="mt-6 text-xs text-white/40">
-      v1.0
-    </p>
+          <span
+  className={`text-xl sm:text-3xl tracking-wider transition-all duration-200 ${
+    selectedMenu === "CONTINUE"
+      ? "translate-x-1 text-white drop-shadow-[0_3px_8px_rgba(0,0,0,0.8)]"
+      : "text-[#B9E6FF]/50 drop-shadow-[0_2px_5px_rgba(0,0,0,0.6)]"
+  }`}
+  style={{ fontFamily: '"Aretha Bridge", serif' }}
+>
+  CONTINUE
+</span>
+        </button>
+
+
+        {/* OPTIONS */}
+        <button
+          onMouseEnter={() => setSelectedMenu("OPTIONS")}
+          onClick={() => setShowOptions(true)}
+          className="group flex items-center justify-center gap-3 py-2 cursor-pointer"
+        >
+          <span
+            className={`w-5 text-[#B9E6FF] transition-all duration-200 ${
+              selectedMenu === "OPTIONS"
+                ? "translate-x-0 opacity-100"
+                : "-translate-x-2 opacity-0"
+            }`}
+          >
+            ✦
+          </span>
+
+          <span
+  className={`text-xl sm:text-3xl tracking-wider transition-all duration-200 ${
+    selectedMenu === "OPTIONS"
+      ? "translate-x-1 text-white drop-shadow-[0_3px_8px_rgba(0,0,0,0.8)]"
+      : "text-[#B9E6FF]/50 drop-shadow-[0_2px_5px_rgba(0,0,0,0.6)]"
+  }`}
+  style={{ fontFamily: '"Aretha Bridge", serif' }}
+>
+  OPTIONS
+</span>
+        </button>
+
+
+        {/* CREDITS */}
+        <button
+          onMouseEnter={() => setSelectedMenu("CREDITS")}
+          onClick={() => setShowCredits(true)}
+          className="group flex items-center justify-center gap-3 py-2 cursor-pointer"
+        >
+          <span
+            className={`w-5 text-[#B9E6FF] transition-all duration-200 ${
+              selectedMenu === "CREDITS"
+                ? "translate-x-0 opacity-100"
+                : "-translate-x-2 opacity-0"
+            }`}
+          >
+            ✦
+          </span>
+
+         <span
+  className={`text-xl sm:text-2xl tracking-wider transition-all duration-200 ${
+    selectedMenu === "CREDITS"
+      ? "translate-x-1 text-white drop-shadow-[0_3px_8px_rgba(0,0,0,0.8)]"
+      : "text-[#B9E6FF]/50 drop-shadow-[0_2px_5px_rgba(0,0,0,0.6)]"
+  }`}
+  style={{ fontFamily: '"Aretha Bridge", serif' }}
+>
+  CREDITS
+</span>
+        </button>
+
+
+        {/* EXIT */}
+        <button
+          onMouseEnter={() => setSelectedMenu("EXIT")}
+          onClick={() => setShowExit(true)}
+          className="group flex items-center justify-center gap-3 py-2 cursor-pointer"
+        >
+          <span
+            className={`w-5 text-[#B9E6FF] transition-all duration-200 ${
+              selectedMenu === "EXIT"
+                ? "translate-x-0 opacity-100"
+                : "-translate-x-2 opacity-0"
+            }`}
+          >
+            ✦
+          </span>
+
+          <span
+  className={`text-xl sm:text-2xl tracking-wider transition-all duration-200 ${
+    selectedMenu === "EXIT"
+      ? "translate-x-1 text-white drop-shadow-[0_3px_8px_rgba(0,0,0,0.8)]"
+      : "text-[#B9E6FF]/50 drop-shadow-[0_2px_5px_rgba(0,0,0,0.6)]"
+  }`}
+  style={{ fontFamily: '"Aretha Bridge", serif' }}
+>
+  EXIT
+</span>
+        </button>
+
+      </div>
+
+
+      {/* SMALL UTILITY BUTTONS */}
+      <div className="mt-10 flex gap-3">
+
+        <button
+          className="border border-white/15 bg-[#07111F]/30 px-4 py-2 text-[10px] tracking-[0.2em] text-[#B9E6FF]/60 transition-all duration-200 hover:border-[#B9E6FF]/50 hover:text-white cursor-pointer"
+        >
+          PORTFOLIO
+        </button>
+
+        <button
+          className="border border-white/15 bg-[#07111F]/30 px-4 py-2 text-[10px] tracking-[0.2em] text-[#B9E6FF]/60 transition-all duration-200 hover:border-[#B9E6FF]/50 hover:text-white cursor-pointer"
+        >
+          CONTACT
+        </button>
+
+      </div>
+
+    </div>
   </div>
 )}
-{gameStage === "loading" && (
-  <div className="relative z-10 flex flex-col items-center justify-center text-center">
-    <h1 className="text-6xl font-black tracking-wider text-white [text-shadow:3px_3px_0_#3B82F6]">
-      Gamezy
-    </h1>
 
-    <p className="mt-6 text-[#B9E6FF] text-lg">
-      Loading...
-    </p>
+{showOptions && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
 
-   <div className="mt-5 w-48 h-2 rounded-full bg-white/10 overflow-hidden">
-  <div className="h-full w-full bg-[#8FD3FF] rounded-full origin-left animate-[loading_2s_ease-in-out_forwards]" />
-</div>
+    <div className="w-[320px] border border-[#B9E6FF]/30 bg-[#07111F]/90 p-7 text-center shadow-[0_0_40px_rgba(0,0,0,0.4)]">
+
+      <h2
+        className={`${medieval.className} text-3xl text-white`}
+      >
+        Options
+      </h2>
+
+      <div className="mt-7 space-y-4 text-sm">
+
+        <div className="flex items-center justify-between border-b border-white/10 pb-3">
+          <span className="text-[#B9E6FF]/70">
+            MUSIC
+          </span>
+
+          <span className="text-white">
+            ON
+          </span>
+        </div>
+
+        <div className="flex items-center justify-between border-b border-white/10 pb-3">
+          <span className="text-[#B9E6FF]/70">
+            SOUND
+          </span>
+
+          <span className="text-white">
+            ON
+          </span>
+        </div>
+
+        <div className="flex items-center justify-between">
+          <span className="text-[#B9E6FF]/70">
+            VERSION
+          </span>
+
+          <span className="text-white/60">
+            v1.0
+          </span>
+        </div>
+
+      </div>
+
+      <button
+        onClick={() => setShowOptions(false)}
+        className="mt-7 border border-[#B9E6FF]/30 px-5 py-2 text-xs tracking-wider text-[#B9E6FF] transition-all hover:border-[#B9E6FF] hover:text-white cursor-pointer"
+      >
+        BACK
+      </button>
+
+    </div>
+
   </div>
 )}
+{showCredits && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+
+    <div className="w-[340px] border border-[#B9E6FF]/30 bg-[#07111F]/90 p-8 text-center shadow-[0_0_40px_rgba(0,0,0,0.4)]">
+
+      <h2
+        className={`${medieval.className} text-3xl text-white`}
+      >
+        Credits
+      </h2>
+
+      <div className="mt-7 space-y-5">
+
+        <div>
+          <p className="text-[10px] tracking-[0.25em] text-[#B9E6FF]/40">
+            CREATED BY
+          </p>
+
+          <p className="mt-1 text-white">
+            Kirti Sinha
+          </p>
+        </div>
+
+        <div>
+          <p className="text-[10px] tracking-[0.25em] text-[#B9E6FF]/40">
+            GAME
+          </p>
+
+          <p className="mt-1 text-white">
+            Gamezy
+          </p>
+        </div>
+
+        <div>
+          <p className="text-[10px] tracking-[0.25em] text-[#B9E6FF]/40">
+            FIRST ADVENTURE
+          </p>
+
+          <p className="mt-1 text-[#B9E6FF]/70">
+            Tic-Tac-Toe
+          </p>
+        </div>
+
+      </div>
+
+      <button
+        onClick={() => setShowCredits(false)}
+        className="mt-8 border border-[#B9E6FF]/30 px-5 py-2 text-xs tracking-wider text-[#B9E6FF] transition-all hover:border-[#B9E6FF] hover:text-white"
+      >
+        BACK
+      </button>
+
+    </div>
+
+  </div>
+)}
+{showExit && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+
+    <div className="w-[320px] border border-[#B9E6FF]/30 bg-[#07111F]/90 p-8 text-center shadow-[0_0_40px_rgba(0,0,0,0.4)]">
+
+      <h2
+        className={`${medieval.className} text-3xl text-white`}
+      >
+        Leave Gamezy?
+      </h2>
+
+      <p className="mt-4 text-sm text-[#B9E6FF]/60">
+        Your current game will remain saved.
+      </p>
+
+      <div className="mt-7 flex justify-center gap-3">
+
+        <button
+          onClick={() => setShowExit(false)}
+          className="border border-[#B9E6FF]/30 px-5 py-2 text-xs tracking-wider text-[#B9E6FF] transition-all hover:border-[#B9E6FF] hover:text-white"
+        >
+          CANCEL
+        </button>
+
+        <button
+          onClick={() => {
+            setShowExit(false);
+            setGameStage("home");
+          }}
+          className="border border-[#B9E6FF]/30 bg-[#B9E6FF]/10 px-5 py-2 text-xs tracking-wider text-white transition-all hover:bg-[#B9E6FF]/20"
+        >
+          EXIT
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+)}
+
   {gameStage === "game" && (
   <div className="relative z-10 flex flex-col items-center">
-      <h1 className="text-6xl font-black tracking-wider leading-none text-white [text-shadow:3px_3px_0_#3B82F6]">
+      <h1 className={`${pressStart.className} text-6xl font-black tracking-wider leading-none text-white [text-shadow:6px_6px_0_#1E2A78]`}
+      >
   Gamezy
 </h1>
 
-      <p className="mt-4 text-lg text-[#B9E6FF]">
+      <p className={`${pressStart.className} mt-4 text-lg text-[#B9E6FF]`}
+      >
   Play. Challenge. Repeat.
 </p>
 
@@ -545,9 +833,9 @@ Preventing moves after the game end */}
 
   {showJoin && (
   <div className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-    <div className="w-80 rounded-2xl bg-[#620607] border border-[#E19184] p-6 shadow-xl text-center animate-[popup_0.2s_ease-out]">
+    <div className="w-80 rounded-2xl bg-[#07111F] border border-[#1E2A78] p-6 shadow-xl text-center animate-[popup_0.2s_ease-out]">
       
-      <h3 className="text-2xl font-bold text-[#E19184]">
+      <h3 className="text-2xl font-bold text-[#B9E6FF]">
         Join Game
       </h3>
 
@@ -606,14 +894,14 @@ setShowJoin(false);
 
 
 }}
-        className="mt-4 px-5 py-2 rounded-lg bg-[#E19184] text-[#620607] font-semibold"
+       className="mt-4 px-5 py-2 rounded-lg bg-[#1E2A78] text-white font-semibold border border-[#4F5FBF] transition-all duration-200 hover:bg-[#28388F] active:scale-95"
       >
         Join
       </button>
 
       <button
         onClick={() => setShowJoin(false)}
-        className="block mx-auto mt-3 text-sm text-[#E19184]"
+        className="block mx-auto mt-3 text-sm text-[#B9E6FF] transition-colors hover:text-white"
       >
         Cancel
       </button>
