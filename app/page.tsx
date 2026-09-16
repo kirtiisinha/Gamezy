@@ -39,9 +39,8 @@ const pressStart = Press_Start_2P({
 //     false: starting value
   const [gameCode, setGameCode] = useState("");
   const [gameStage, setGameStage] = useState<
-  "home" | "select" | "game"
-  >("home");
-
+  "start" | "loading" | "select" | "game"
+>("home");
   const [selectedMenu, setSelectedMenu] = useState("CONTINUE");
   const [showOptions, setShowOptions] = useState(false);
   const [showCredits, setShowCredits] = useState(false);
@@ -371,10 +370,10 @@ useEffect(() => {
 
         {/* CONTINUE */}
         <button
-          onMouseEnter={() => setSelectedMenu("CONTINUE")}
-          onClick={() => setGameStage("game")}
-          className="group flex items-center justify-center gap-3 py-2 cursor-pointer"
-        >
+  onMouseEnter={() => setSelectedMenu("CONTINUE")}
+  onClick={() => setGameStage("select")}
+  className="group flex items-center justify-center gap-3 py-2 cursor-pointer"
+>
           <span
             className={`w-5 text-[#B9E6FF] transition-all duration-200 ${
               selectedMenu === "CONTINUE"
@@ -660,7 +659,78 @@ useEffect(() => {
 
   </div>
 )}
+{gameStage === "select" && (
+  <div className="relative z-10 flex min-h-screen w-full items-center justify-center">
+    <div className="flex flex-col items-center text-center">
 
+      {/* SELECT GAME TITLE */}
+      <h1
+        className="text-5xl sm:text-6xl tracking-wide text-[#E8F4FF] drop-shadow-[0_4px_12px_rgba(0,0,0,0.7)]"
+        style={{ fontFamily: '"Aretha Bridge", serif' }}
+      >
+        SELECT GAME
+      </h1>
+
+      <p
+        className="mt-3 text-sm tracking-[0.25em] text-[#B9E6FF]/50 uppercase"
+        style={{ fontFamily: '"Aretha Bridge", serif' }}
+      >
+        Choose your adventure
+      </p>
+
+      {/* GAME OPTIONS */}
+      <div className="mt-10 flex flex-col items-center gap-5">
+
+        {/* TIC-TAC-TOE */}
+        <button
+          onClick={() => setGameStage("game")}
+          className="group flex w-72 cursor-pointer items-center justify-between border border-[#B9E6FF]/25 bg-[#07111F]/45 px-7 py-5 text-left backdrop-blur-sm transition-all duration-200 hover:border-[#B9E6FF]/70 hover:bg-[#07111F]/65 hover:shadow-[0_0_25px_rgba(143,211,255,0.12)] active:scale-[0.98]"
+        >
+          <div>
+            <p
+              className="text-2xl tracking-wider text-white transition-all duration-200 group-hover:translate-x-1"
+              style={{ fontFamily: '"Aretha Bridge", serif' }}
+            >
+              TIC-TAC-TOE
+            </p>
+
+            <p className="mt-2 text-xs tracking-[0.15em] text-[#B9E6FF]/45 uppercase">
+              Multiplayer
+            </p>
+          </div>
+
+          <span className="text-xl text-[#B9E6FF]/60 transition-all duration-200 group-hover:translate-x-1 group-hover:text-[#B9E6FF]">
+            →
+          </span>
+        </button>
+
+        {/* FUTURE GAME */}
+        <div className="w-72 border border-white/10 bg-[#07111F]/20 px-7 py-5 text-left opacity-40">
+          <p
+            className="text-xl tracking-wider text-[#B9E6FF]/60"
+            style={{ fontFamily: '"Aretha Bridge", serif' }}
+          >
+            COMING SOON
+          </p>
+
+          <p className="mt-2 text-xs tracking-[0.15em] text-[#B9E6FF]/30 uppercase">
+            Another adventure awaits
+          </p>
+        </div>
+
+      </div>
+
+      {/* BACK */}
+      <button
+        onClick={() => setGameStage("home")}
+        className="mt-10 cursor-pointer border border-[#B9E6FF]/30 px-5 py-2 text-xs tracking-wider text-[#B9E6FF] transition-all duration-200 hover:border-[#B9E6FF] hover:text-white active:scale-95"
+      >
+        ← BACK
+      </button>
+
+    </div>
+  </div>
+)}
   {gameStage === "game" && (
   <div className="relative z-10 flex flex-col items-center">
       <h1 className={`${pressStart.className} text-6xl font-black tracking-wider leading-none text-white [text-shadow:6px_6px_0_#1E2A78]`}
